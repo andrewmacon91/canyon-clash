@@ -94,12 +94,13 @@ In App Store Connect, fill the listing:
 The game already has ads wired in (rewarded **Revive** + **Double Coins**, an **interstitial** every other
 run, and a **menu banner**), running on Google's **test ad units** so it works with no account.
 
-- ⬜ Create a free **AdMob account**: <https://admob.google.com> → add your app → create **3 ad units**
-      (Banner, Interstitial, Rewarded). You'll get an **App ID** (`ca-app-pub-XXXX~YYYY`) and three unit IDs.
-- ⬜ Tell me the 4 IDs and I'll drop them into `www/index.html` (`AD_IDS`) and `Info.plist`
-      (`GADApplicationIdentifier`) — one small edit, then `cap sync`.
-- ⚠️ **Never** run **real** ad IDs on a device you tap yourself, and never click your own live ads —
-      AdMob bans accounts for "invalid traffic." Keep the test IDs until you're testing on real users.
+- ✅ AdMob account created + 3 ad units made (Banner / Interstitial / Rewarded).
+- ✅ **Live IDs wired in** — App ID `ca-app-pub-3217608084038215~6988088862` in `Info.plist`; the three
+      unit IDs in `www/index.html` (`AD_IDS`). AdMob is in production mode (`initializeForTesting:false`).
+- ⚠️ **Do NOT tap your own ads.** The app now serves **real** ads. When you test on your iPad, just let
+      the ad appear and close it — never click the ad content. AdMob bans accounts for "invalid traffic."
+      (Safer option: send me the *test device ID* printed in the logs on first run and I'll register your
+      iPad so it shows tappable test ads.)
 - ⬜ In AdMob, link your **bank account + tax info** to get paid (payout threshold is **$100**).
 - ⬜ Earnings only start once the app is **live** and getting installs.
 

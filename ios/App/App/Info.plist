@@ -45,7 +45,7 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-3217608084038215~6988088862</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This lets us show ads that are more relevant to you. You can play the game whether or not you allow this.</string>
 	<key>SKAdNetworkItems</key>

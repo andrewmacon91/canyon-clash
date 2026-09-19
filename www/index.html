@@ -412,12 +412,11 @@ function offerUpgrades(){
 function applyUpgrade(u){u.a();renderBuffs();upScreen.hidden=true;level++;lvlEl.textContent=level;resumeAfterBoss();}
 
 /* ===== AdMob (native only; no-ops on web) ===== *
- * Uses Google's official TEST ad unit IDs. Replace AD_IDS with your real
- * AdMob unit IDs before release — see CHECKLIST.md, "Monetization".        */
+ * LIVE AdMob ad unit IDs for Canyon Clash (App ID lives in Info.plist).     */
 var AD_IDS={
-  banner:      'ca-app-pub-3940256099942544/2934735716', // iOS test banner
-  interstitial:'ca-app-pub-3940256099942544/4411468910', // iOS test interstitial
-  rewarded:    'ca-app-pub-3940256099942544/1712485313'  // iOS test rewarded
+  banner:      'ca-app-pub-3217608084038215/5374343038', // Canyon Clash - Banner
+  interstitial:'ca-app-pub-3217608084038215/1735762182', // Canyon Clash - Interstitial
+  rewarded:    'ca-app-pub-3217608084038215/4041080060'  // Canyon Clash - Rewarded
 };
 var Ads=(function(){
   var cap=window.Capacitor;
@@ -428,7 +427,7 @@ var Ads=(function(){
   function prepReward(){ if(AdMob) AdMob.prepareRewardVideoAd({adId:AD_IDS.rewarded}).catch(function(){}); }
   function init(){
     if(!AdMob) return;
-    AdMob.initialize({initializeForTesting:true})
+    AdMob.initialize({initializeForTesting:false})
       .then(function(){ return AdMob.trackingAuthorizationStatus().catch(function(){return null;}); })
       .then(function(t){ if(t&&t.status==='notDetermined') return AdMob.requestTrackingAuthorization().catch(function(){}); })
       .then(function(){ prepInter(); prepReward();
