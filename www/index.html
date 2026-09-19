@@ -73,6 +73,12 @@
   .btn:active{transform:translateY(5px);box-shadow:0 3px 0 #0a7f96,0 6px 14px rgba(0,0,0,.4);}
   .btn.ghost{color:#ffe3c2;background:linear-gradient(180deg,#4a3320,#2c1d10);box-shadow:0 7px 0 #1a1109,0 12px 20px rgba(0,0,0,.4);font-size:15px;padding:12px 22px;}
   .btn.ghost:active{box-shadow:0 2px 0 #1a1109;transform:translateY(5px);}
+  .btn.rev{background:linear-gradient(180deg,#ffe08a,#e0a022);color:#3a2600;box-shadow:0 8px 0 #a8760f,0 14px 24px rgba(0,0,0,.4);font-size:17px;}
+  .btn.rev:active{box-shadow:0 3px 0 #a8760f;transform:translateY(5px);}
+  .btn.x2{background:linear-gradient(180deg,#8ff0a8,#27b366);color:#053a1c;box-shadow:0 8px 0 #12833f,0 14px 24px rgba(0,0,0,.4);font-size:15px;padding:12px 22px;}
+  .btn.x2:active{box-shadow:0 3px 0 #12833f;transform:translateY(5px);}
+  .btn[disabled]{opacity:.55;pointer-events:none;}
+  .adtag{font-size:10px;font-weight:700;letter-spacing:1px;background:rgba(0,0,0,.22);border-radius:6px;padding:2px 6px;margin-left:8px;vertical-align:middle;}
   .stat{display:flex;gap:26px;margin-top:2px;}
   .stat div{display:flex;flex-direction:column;gap:2px;}
   .stat b{font-size:30px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;}
@@ -130,6 +136,8 @@
       <div><b id="fCoins">0</b><span>Coins</span></div>
       <div><b id="fWave">0</b><span>Bosses</span></div>
     </div>
+    <button class="btn rev" id="reviveBtn" hidden>▶ REVIVE<span class="adtag">AD</span></button>
+    <button class="btn x2" id="x2Btn" hidden>▶ DOUBLE COINS<span class="adtag">AD</span></button>
     <button class="btn" id="retryBtn">PLAY AGAIN</button>
   </div>
 </div>
@@ -351,8 +359,10 @@ function releasePart(m){m.visible=false;scene.remove(m);if(m.geometry===coinGeo)
 var crowdEl=document.getElementById('crowd'),coinsEl=document.getElementById('coins'),distEl=document.getElementById('dist'),
     lvlEl=document.querySelector('#lvl b'),buffsEl=document.getElementById('buffs'),
     bossWrap=document.getElementById('bossWrap'),bossBar=document.getElementById('bossBar'),bossPct=document.getElementById('bossPct'),
-    toastEl=document.getElementById('toast'),autoBtn=document.getElementById('autoBtn');
+    toastEl=document.getElementById('toast'),autoBtn=document.getElementById('autoBtn'),
+    reviveBtn=document.getElementById('reviveBtn'),x2Btn=document.getElementById('x2Btn');
 var coins=0,dist=0,bosses=0,state='menu',auto=false,shake=0,fireAcc=0;
+var deaths=0,revivedThisRun=false,x2Used=false;
 var nextGate=30,nextWave=52,nextBoss=230,bossGap=340;
 
 function toast(msg){toastEl.textContent=msg;toastEl.style.transition='none';
@@ -401,6 +411,64 @@ function offerUpgrades(){
 }
 function applyUpgrade(u){u.a();renderBuffs();upScreen.hidden=true;level++;lvlEl.textContent=level;resumeAfterBoss();}
 
+/* ===== AdMob (native only; no-ops on web) ===== *
+ * Uses Google's official TEST ad unit IDs. Replace AD_IDS with your real
+ * AdMob unit IDs before release — see CHECKLIST.md, "Monetization".        */
+var AD_IDS={
+  banner:      'ca-app-pub-3940256099942544/2934735716', // iOS test banner
+  interstitial:'ca-app-pub-3940256099942544/4411468910', // iOS test interstitial
+  rewarded:    'ca-app-pub-3940256099942544/1712485313'  // iOS test rewarded
+};
+var Ads=(function(){
+  var cap=window.Capacitor;
+  var native=!!(cap&&cap.isNativePlatform&&cap.isNativePlatform());
+  var AdMob=(native&&cap.Plugins)?cap.Plugins.AdMob:null;
+  var interReady=false, rewardGranted=false, bannerShown=false;
+  function prepInter(){ if(AdMob) AdMob.prepareInterstitial({adId:AD_IDS.interstitial}).then(function(){interReady=true;}).catch(function(){}); }
+  function prepReward(){ if(AdMob) AdMob.prepareRewardVideoAd({adId:AD_IDS.rewarded}).catch(function(){}); }
+  function init(){
+    if(!AdMob) return;
+    AdMob.initialize({initializeForTesting:true})
+      .then(function(){ return AdMob.trackingAuthorizationStatus().catch(function(){return null;}); })
+      .then(function(t){ if(t&&t.status==='notDetermined') return AdMob.requestTrackingAuthorization().catch(function(){}); })
+      .then(function(){ prepInter(); prepReward();
+        try{ AdMob.addListener('onRewardedVideoAdReward',function(){ rewardGranted=true; }); }catch(e){} })
+      .catch(function(){});
+  }
+  return {
+    available: native,
+    init: init,
+    showBanner:function(){ if(!AdMob||bannerShown)return; bannerShown=true;
+      AdMob.showBanner({adId:AD_IDS.banner,adSize:'ADAPTIVE_BANNER',position:'BOTTOM_CENTER',margin:0}).catch(function(){bannerShown=false;}); },
+    hideBanner:function(){ if(!AdMob||!bannerShown)return; bannerShown=false; AdMob.hideBanner().catch(function(){}); },
+    interstitial:function(){ if(!AdMob||!interReady) return Promise.resolve();
+      interReady=false; return AdMob.showInterstitial().catch(function(){}).then(function(){ prepInter(); }); },
+    rewarded:function(){ if(!AdMob) return Promise.resolve(false);
+      rewardGranted=false;
+      return AdMob.showRewardVideoAd().then(function(r){ prepReward(); return rewardGranted||!!(r&&(r.amount||r.type)); })
+                                      .catch(function(){ prepReward(); return false; }); }
+  };
+})();
+
+function doRevive(){
+  revivedThisRun=true; reviveBtn.hidden=true; x2Btn.hidden=true;
+  enemies.forEach(function(e){scene.remove(e);}); enemies=[];
+  setCrowd(25);
+  document.getElementById('overScreen').hidden=true;
+  Ads.hideBanner();
+  state='playing';
+}
+reviveBtn.onclick=function(){
+  reviveBtn.disabled=true;
+  Ads.rewarded().then(function(g){ reviveBtn.disabled=false; if(g) doRevive(); });
+};
+x2Btn.onclick=function(){
+  x2Btn.disabled=true;
+  Ads.rewarded().then(function(g){ x2Btn.disabled=false;
+    if(g){ x2Used=true; coins=coins*2; coinsEl.textContent=coins;
+      document.getElementById('fCoins').textContent=coins; x2Btn.hidden=true; } });
+};
+
 /* control */
 function reset(demo){
   gates.forEach(function(g){scene.remove(g);});gates=[];
@@ -414,6 +482,8 @@ function reset(demo){
   coinsEl.textContent='0';distEl.textContent='0';lvlEl.textContent='1';
   setCrowd(1);
   auto=!!demo;autoBtn.classList.toggle('on',auto);autoBtn.setAttribute('aria-pressed',auto);
+  revivedThisRun=false;x2Used=false;reviveBtn.hidden=true;x2Btn.hidden=true;reviveBtn.disabled=false;x2Btn.disabled=false;
+  Ads.hideBanner();
   state='playing';document.getElementById('startScreen').hidden=true;document.getElementById('overScreen').hidden=true;upScreen.hidden=true;
 }
 function resumeAfterBoss(){
@@ -421,14 +491,20 @@ function resumeAfterBoss(){
   nextGate=dist+36;nextWave=dist+64;nextBoss=dist+bossGap;bossGap+=30;
   state='playing';
 }
-function gameOver(){state='over';
+function gameOver(){state='over';deaths++;
   document.getElementById('fDist').textContent=Math.floor(dist);
   document.getElementById('fCoins').textContent=coins;
   document.getElementById('fWave').textContent=bosses;
+  reviveBtn.hidden=!(Ads.available&&!revivedThisRun);
+  x2Btn.hidden=!(Ads.available&&!x2Used&&coins>0);
+  Ads.showBanner();
   document.getElementById('overScreen').hidden=false;}
 document.getElementById('playBtn').onclick=function(){reset(false);};
 document.getElementById('demoBtn').onclick=function(){reset(true);};
-document.getElementById('retryBtn').onclick=function(){reset(auto);};
+document.getElementById('retryBtn').onclick=function(){
+  var a=auto;
+  if(deaths%2===0){ Ads.interstitial().then(function(){reset(a);}); } else { reset(a); }
+};
 autoBtn.onclick=function(){auto=!auto;autoBtn.classList.toggle('on',auto);autoBtn.setAttribute('aria-pressed',auto);};
 
 /* input */
@@ -555,6 +631,7 @@ function bossDie(){
 }
 
 ensureSoldiers(1);renderBuffs();resize();tick();
+Ads.init(); if(Ads.available) setTimeout(function(){ if(state==='menu') Ads.showBanner(); },1200);
 })();
 </script>
 </body>

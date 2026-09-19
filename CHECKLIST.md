@@ -78,12 +78,30 @@ In App Store Connect, fill the listing:
       (need 6.5" iPhone + 12.9" iPad sizes; the iPad shots you can capture directly).
 - ⬜ **App icon** — pulled from the build automatically.
 - ⬜ **Description, keywords, category** (Games › Action or Arcade).
-- ⬜ **Privacy Policy URL** — required. A simple hosted page (I can generate the text; you host it
-      free on GitHub Pages).
-- ⬜ **App Privacy** questionnaire — currently the game collects **no data** (answer "No" throughout),
-      which keeps this simple. *This changes the moment you add ads/analytics.*
+- ⬜ **Privacy Policy URL** — required. The page is ready at `docs/index.html`; host it free on
+      GitHub Pages (Settings → Pages → Source: `main` / `docs`). URL: `https://<user>.github.io/canyon-clash/`.
+- ⬜ **App Privacy** questionnaire — the app now shows AdMob ads, so answer **Yes**, data is collected.
+      Declare: **Identifiers → Device ID** and **Usage Data**, purpose **Third-Party Advertising**,
+      linked to the user’s identity **No**, used for tracking **Yes** (because of ads). Google publishes
+      the exact "Data collected by AdMob" list — I can walk you through each toggle.
 - ⬜ **Age rating** questionnaire.
 - ⬜ Click **Add for Review → Submit**. First review typically 24–48h.
+
+---
+
+## Part F — Monetization (AdMob) — the code is DONE, you do the account
+
+The game already has ads wired in (rewarded **Revive** + **Double Coins**, an **interstitial** every other
+run, and a **menu banner**), running on Google's **test ad units** so it works with no account.
+
+- ⬜ Create a free **AdMob account**: <https://admob.google.com> → add your app → create **3 ad units**
+      (Banner, Interstitial, Rewarded). You'll get an **App ID** (`ca-app-pub-XXXX~YYYY`) and three unit IDs.
+- ⬜ Tell me the 4 IDs and I'll drop them into `www/index.html` (`AD_IDS`) and `Info.plist`
+      (`GADApplicationIdentifier`) — one small edit, then `cap sync`.
+- ⚠️ **Never** run **real** ad IDs on a device you tap yourself, and never click your own live ads —
+      AdMob bans accounts for "invalid traffic." Keep the test IDs until you're testing on real users.
+- ⬜ In AdMob, link your **bank account + tax info** to get paid (payout threshold is **$100**).
+- ⬜ Earnings only start once the app is **live** and getting installs.
 
 ---
 
@@ -91,8 +109,9 @@ In App Store Connect, fill the listing:
 
 - **Guideline 4.2 (minimum functionality):** Apple can reject apps that feel like a thin web
   wrapper. Canyon Clash has real gameplay, which helps — but the more content/polish, the safer.
-- **To actually earn money**, this needs ads (AdMob/Unity Ads) and/or IAP later. That is a
-  separate build step and changes the privacy answers. Ask me when you're ready.
+- **App Tracking Transparency:** the app asks permission before using the ad identifier (already wired).
+  Don't remove the `NSUserTrackingUsageDescription` string or Apple will reject the build.
+- **Test vs. live ads:** ship the build with **your real** ad unit IDs, but never tap them yourself.
 
 ---
 
