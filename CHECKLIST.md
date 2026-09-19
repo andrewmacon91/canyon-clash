@@ -13,27 +13,22 @@ Legend: ⬜ = you do it · ✅ = already done for you
 - ✅ Xcode/Capacitor iOS project scaffolded (`ios/` folder)
 - ✅ App icon + splash generated
 - ✅ Offline game bundle (no internet needed to play)
-- ✅ `codemagic.yaml` cloud-build config
-- ⬜ **Apple Developer Program** — enroll at <https://developer.apple.com/programs/enroll/>
-      (or the *Apple Developer* app on your iPad). **$99/year.** Needs your Apple ID + a card.
-      Enrollment can take a few hours to ~2 days to be approved.
-- ⬜ **GitHub account** (free) — <https://github.com/signup>. Codemagic builds from a Git repo.
-- ⬜ **Codemagic account** (free tier is enough to start) — sign in with GitHub at
-      <https://codemagic.io>.
+- ✅ GitHub Actions build workflow (`.github/workflows/ios.yml`) — builds on GitHub's macOS runners
+- ✅ Apple Developer account (you're signed in)
+- ⬜ Confirm **Apple Developer Program** membership is active ($99/year). Needs your Apple ID + a card;
+      enrollment approval can take a few hours to ~2 days.
+- ⬜ **GitHub account** (free) — <https://github.com/signup>. This is where the code lives AND where
+      the app gets built — no other service needed.
 
 ---
 
 ## Part B — Push the code to GitHub
 
-From this folder (`Canyon Clash`) on your PC. (Ask me and I'll run these for you.)
+The repo is already committed locally. You just need to create the GitHub repo and push.
+(Once your GitHub account exists, ask me and I'll run the push for you.)
 
-```bash
-git init
-git add .
-git commit -m "Canyon Clash v1"
-```
-
-Then create an **empty private repo** on GitHub called `canyon-clash`, and:
+1. Create an **empty private repo** on GitHub named `canyon-clash` (don't add a README/.gitignore).
+2. Then, from this folder:
 
 ```bash
 git remote add origin https://github.com/<your-username>/canyon-clash.git
@@ -43,22 +38,29 @@ git push -u origin main
 
 ---
 
-## Part C — Codemagic: connect signing (the fiddly part)
+## Part C — Signing + first build (GitHub Actions)
 
-1. In **App Store Connect** (<https://appstoreconnect.apple.com>, works in any browser/iPad):
-   - **Users and Access → Integrations → App Store Connect API** → generate an **API Key**
-     with the **App Manager** role. Download the `.p8` file **once** (you can't re-download it),
-     and note the **Key ID** and **Issuer ID**.
-2. Create the app record: **App Store Connect → Apps → +** →
-   - Platform: iOS · Name: **Canyon Clash** · Primary language: English
-   - **Bundle ID:** `com.jarvis.canyonclash` (must match `capacitor.config.json` — tell me if you
-     want a different one, e.g. using your own domain, and I'll change it everywhere)
+1. **App Store Connect API key** — in **App Store Connect** (<https://appstoreconnect.apple.com>, any browser/iPad):
+   **Users and Access → Integrations → App Store Connect API → Team Keys → +** → role **App Manager** →
+   **Generate**. Download the `AuthKey_XXXX.p8` file **once** (you can't re-download it) and note the
+   **Key ID** and **Issuer ID**.
+2. **Create the app record:** **App Store Connect → Apps → +** →
+   - Platform: iOS · Name: **Canyon Clash** · Primary language: English (U.S.)
+   - **Bundle ID:** `com.jarvis.canyonclash` (tell me if you want your own domain instead and I'll change it everywhere)
    - SKU: `canyonclash01`
-3. In **Codemagic → Teams → Integrations → Developer Portal**: add the App Store Connect API key
-   (upload the `.p8`, paste Key ID + Issuer ID). **Name it exactly `CanyonClash ASC Key`**
-   (that string is referenced in `codemagic.yaml`) — or rename it in the yaml.
-4. In **Codemagic**, add this repo as an app, pick **workflow from `codemagic.yaml`**, and
-   **Start build**. It will build on a cloud Mac and upload to **TestFlight** automatically.
+3. **Add 3 GitHub secrets** — in your repo: **Settings → Secrets and variables → Actions → New repository secret**.
+   Create these three (names must match exactly):
+   | Secret name | Value |
+   |---|---|
+   | `APP_STORE_CONNECT_ISSUER_ID` | the Issuer ID |
+   | `APP_STORE_CONNECT_KEY_IDENTIFIER` | the Key ID |
+   | `APP_STORE_CONNECT_PRIVATE_KEY` | paste the **entire contents** of the `.p8` file (open it in a text editor) |
+4. **Run the build:** repo **Actions** tab → **iOS build → TestFlight** → **Run workflow**.
+   (Or push a tag: `git tag v1.0.0 && git push --tags`.) It builds on a macOS runner, signs the app
+   using your API key, and uploads to **TestFlight** automatically. First run takes ~10–15 min.
+
+> Note: iOS signing in CI sometimes needs a tweak on the first run (it's the finicky part). If the
+> build fails, paste me the failed step's log and I'll fix the workflow.
 
 ---
 

@@ -1,0 +1,89 @@
+name: iOS build → TestFlight
+
+# Builds the iOS app on GitHub's macOS runners, signs it with your
+# App Store Connect API key, and uploads to TestFlight. No Mac required.
+#
+# Run it from the GitHub "Actions" tab (Run workflow), or by pushing a tag like v1.0.0.
+# Requires three repo secrets (Settings → Secrets and variables → Actions):
+#   APP_STORE_CONNECT_ISSUER_ID       — Issuer ID from App Store Connect API
+#   APP_STORE_CONNECT_KEY_IDENTIFIER  — the Key ID
+#   APP_STORE_CONNECT_PRIVATE_KEY     — the full contents of the AuthKey_XXXX.p8 file
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-14
+    env:
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+      BUNDLE_ID: com.jarvis.canyonclash
+      XCODE_WORKSPACE: ios/App/App.xcworkspace
+      XCODE_SCHEME: App
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Capacitor sync (copy web assets + plugins into iOS)
+        run: npx cap sync ios
+
+      - name: Install CocoaPods
+        run: |
+          cd ios/App
+          pod install
+
+      - name: Install signing/build tools
+        run: pip3 install codemagic-cli-tools
+
+      - name: Fetch code-signing files (App Store Connect API)
+        run: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: Set build number
+        run: |
+          cd ios/App
+          agvtool new-version -all "${{ github.run_number }}"
+
+      - name: Build signed IPA
+        run: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+
+      - name: Upload to TestFlight
+        run: |
+          IPA_PATH="$(find build/ios/ipa -name '*.ipa' | head -1)"
+          echo "Uploading $IPA_PATH"
+          app-store-connect publish \
+            --path "$IPA_PATH" \
+            --testflight
+
+      - name: Save the IPA as an artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canyon-clash-ipa
+          path: build/ios/ipa/*.ipa
+          if-no-files-found: ignore
