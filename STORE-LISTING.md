@@ -90,9 +90,9 @@ Thanks for playing! More levels and bosses coming soon.
 - Expected result: **9+**
 
 ## URLs
-- **Privacy Policy URL** *(required):* `https://<your-username>.github.io/canyon-clash/`
-- **Support URL** *(required):* reuse the same GitHub Pages URL for now, or a simple contact page.
-- **Marketing URL** *(optional):* leave blank, or a landing page later.
+- **Privacy Policy URL** *(required):* `https://andrewmacon91.github.io/canyon-clash/privacy.html`
+- **Support URL** *(required):* `https://andrewmacon91.github.io/canyon-clash/` (the game page) for now, or a contact page.
+- **Marketing URL** *(optional):* `https://andrewmacon91.github.io/canyon-clash/` (the playable web version).
 
 ## Other fields
 - **Copyright:** `© 2026 Andrew Macon`
