@@ -1,5 +1,5 @@
 /* Canyon Clash service worker — offline play after first load. */
-var CACHE = 'canyon-clash-v2';
+var CACHE = 'canyon-clash-v3';
 var CORE = ['./', 'index.html', 'three.min.js', 'fonts.css', 'manifest.webmanifest',
   'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
