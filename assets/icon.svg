@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="80%">
+      <stop offset="0%" stop-color="#f6c463"/>
+      <stop offset="55%" stop-color="#e0913f"/>
+      <stop offset="100%" stop-color="#a1472a"/>
+    </radialGradient>
+    <linearGradient id="cy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a5fbff"/>
+      <stop offset="100%" stop-color="#12b6d6"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe08a"/>
+      <stop offset="100%" stop-color="#d99a20"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <!-- canyon walls -->
+  <path d="M0 1024 L0 470 L150 520 L235 460 L300 560 L300 1024 Z" fill="#8a3c24" opacity="0.9"/>
+  <path d="M1024 1024 L1024 440 L880 500 L800 440 L724 540 L724 1024 Z" fill="#8a3c24" opacity="0.9"/>
+  <!-- sun glow -->
+  <circle cx="512" cy="360" r="250" fill="#ffe6b0" opacity="0.25"/>
+  <!-- upward squad chevron -->
+  <path d="M512 300 L712 560 L616 560 L512 424 L408 560 L312 560 Z" fill="url(#cy)"/>
+  <path d="M512 452 L672 660 L584 660 L512 566 L440 660 L352 660 Z" fill="url(#cy)" opacity="0.85"/>
+  <!-- x2 tag -->
+  <g transform="translate(512 792)">
+    <rect x="-118" y="-58" width="236" height="116" rx="30" fill="#06333d" stroke="#a5fbff" stroke-width="8"/>
+    <text x="0" y="6" font-family="Arial, sans-serif" font-weight="800" font-size="92" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">×2</text>
+  </g>
+  <!-- coins -->
+  <circle cx="792" cy="820" r="52" fill="url(#gold)" stroke="#8a5f12" stroke-width="6"/>
+  <circle cx="228" cy="792" r="40" fill="url(#gold)" stroke="#8a5f12" stroke-width="5"/>
+</svg>

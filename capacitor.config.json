@@ -1,0 +1,10 @@
+{
+  "appId": "com.jarvis.canyonclash",
+  "appName": "Canyon Clash",
+  "webDir": "www",
+  "backgroundColor": "#0d0805",
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0d0805"
+  }
+}
