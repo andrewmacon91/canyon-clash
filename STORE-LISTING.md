@@ -7,10 +7,9 @@ Character limits are noted so nothing gets truncated on submit.
 
 ## App Name  *(max 30 chars)*
 ```
-Canyon Clash: Army Runner
+Canyon Clash
 ```
-*(25 chars. Adding "Army Runner" helps people find it in search. If you'd rather keep it pure brand,
-just use `Canyon Clash`.)*
+*(12 chars.)*
 
 ## Subtitle  *(max 30 chars)*
 ```
@@ -26,9 +25,9 @@ Grow a tiny cyan squad into a roaring army through ×2 gates, out-blast the crim
 
 ## Keywords  *(max 100 chars, comma-separated, NO spaces — don't repeat words already in the name/subtitle)*
 ```
-crowd,gate,multiply,number,idle,arcade,shooter,boss,squad,offline,merge,count,3d,tap,rush,horde
+crowd,gate,multiply,number,idle,arcade,shooter,boss,squad,offline,merge,count,3d,tap,rush,runner
 ```
-*(≈95 chars.)*
+*(≈96 chars. "runner" is now a free keyword since the app name is just "Canyon Clash".)*
 
 ---
 
@@ -96,7 +95,7 @@ Thanks for playing! More levels and bosses coming soon.
 - **Marketing URL** *(optional):* leave blank, or a landing page later.
 
 ## Other fields
-- **Copyright:** `© 2026 <Your name or company>`
+- **Copyright:** `© 2026 Andrew Macon`
 - **Bundle ID:** `com.jarvis.canyonclash` *(tell me if you want your own)*
 - **Primary Language:** English (U.S.)
 - **Price:** Free (revenue comes from the AdMob ads already built in)
