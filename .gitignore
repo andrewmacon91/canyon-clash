@@ -16,3 +16,6 @@ xcuserdata/
 .DS_Store
 *.log
 npm-debug.log*
+
+# throwaway artifact-format copy (regenerated on demand)
+artifact-build.html
